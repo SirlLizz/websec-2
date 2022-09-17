@@ -1,0 +1,62 @@
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" type="text/css" href="style.css"/>
+        <link rel="stylesheet" type="text/css" href="colorpicker/colorPick.min.css"/>
+        <title>Shooting game</title>
+        <script src="/socket.io/socket.io.js"></script>
+    </head>
+    <body>
+        <table class="playing-field-table">
+            <tr>
+                <td>
+                    <div id="user-list"></div>
+                </td>
+                <td>
+                    <canvas id="canvas"></canvas>
+                </td>
+            </tr>
+        </table>
+        <div id="overlay">
+            <div class="popup">
+                <h2 class="overlay-title">Create Hero!</h2>
+                <div>
+                    <table class="overlay-table">
+                        <tbody class="overlay-tbody">
+                            <tr>
+                                <td>
+                                    <p class="overlay-table-unit">Enter your name:</p>
+                                </td>
+                                <td>
+                                    <input class="overlay-table-unit" id="inputName" type="text">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <p class="overlay-table-unit">Enter your color:</p>
+                                </td>
+                                <td>
+                                    <div class="picker overlay-table-unit" id="picker"></div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <button class="overlay-start-btn" title="Start" onclick="start_game()">Start</button>
+            </div>
+        </div>
+    </body>
+    <script src="../static/game.js"></script>
+    <script src="../static/modal.js"></script>
+    <script src="colorpicker/jquery-3.1.1.min.js"></script>
+    <script src="colorpicker/colorPick.min.js"></script>
+    <script>
+        $("#picker").colorPick({
+            'initialColor' : '#8e44ad',
+            'palette': ["#1abc9c", "#2ecc71", "#27ae60", "#3498db", "#2980b9", "#9b59b6", "#8e44ad", "#34495e", "#2c3e50", "#f1c40f", "#f39c12", "#e67e22", "#d35400", "#e74c3c", "#c0392b", "#ecf0f1"],
+            'onColorSelected': function() {
+                this.element.css({'backgroundColor': this.color, 'color': this.color});
+            }
+        });
+    </script>
+</html>
