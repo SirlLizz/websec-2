@@ -1,8 +1,15 @@
 let socket = io();
 
 function start_game() {
+    let color = document.getElementById('picker').style.color;
+    let name = document.getElementById('inputName').value;
     document.getElementById('overlay').style.display='none';
-    socket.emit('new_player', document.getElementById('picker').style.color, document.getElementById('inputName').value);
+    if(name === ''){
+        addPlayer(socket.id.slice(0,8), color, 'lightgreen');
+    }else{
+        addPlayer(name, color, 'lightgreen');
+    }
+    socket.emit('new_player', color, name);
 }
 
 let movement = {
@@ -57,7 +64,7 @@ setInterval(function() {
 
 socket.on('state', function(players) {
     let canvas = document.getElementById('canvas');
-    canvas.width = window.innerWidth;
+    canvas.width = window.innerWidth - 226;
     canvas.height = window.innerHeight;
     let context = canvas.getContext('2d');
     context.clearRect(0,0, canvas.width, canvas.height);
@@ -65,10 +72,41 @@ socket.on('state', function(players) {
         let player = players[id];
         context.beginPath();
         context.fillStyle = player.color;
-        context.arc(player.x, player.y, 10, 0, 2 * Math.PI);
+        context.rect(player.x, player.y, 20, 20);
         context.fill();
     }
 });
 
+socket.on('new_connect', function(players) {
+    let thisListElem = document.getElementsByClassName("user-list__item_name");
+    console.log(thisListElem);
+    for (let id in players) {
+        let player = players[id];
+        let koef = 0;
+        console.log(thisListElem.length)
+        for(let elemId = 0; elemId < thisListElem.length; elemId++){
+            console.log(thisListElem[elemId].textContent);
+            if(player.name === thisListElem[elemId].textContent){
+                koef +=1;
+            }
+        }
+        console.log(koef);
+        if(koef === 0){
+            addPlayer(player.name, player.color);
+        }
+    }
+});
+
+function addPlayer(name, color, backgroundColor = '#eeeeee'){
+    let listElem = document.querySelector('#user-list');
+    const newItem = document.createElement('div');
+    newItem.innerHTML = `
+			<div class="user-list__item" style="background-color: ${backgroundColor}">
+     			<b class="user-list__item_name">${name}</b>
+     			<button class="user-list__item_color" style="background-color: ${color}"></button>
+    		</div>
+			`;
+    listElem.appendChild(newItem);
+}
 
 

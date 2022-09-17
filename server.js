@@ -14,7 +14,6 @@ app.get('/', function(request, response) {
     response.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// Запуск сервера
 server.listen(5000, function() {
     console.log('Запускаю сервер на порте 5000');
 });
@@ -29,7 +28,7 @@ io.on('connection', function(socket) {
                 x: 300,
                 y: 300,
                 color: color,
-                name: socket.id
+                name: socket.id.slice(0,8)
             };
         }else{
             players[socket.id] = {
@@ -39,7 +38,7 @@ io.on('connection', function(socket) {
                 name: name
             };
         }
-
+        io.sockets.emit('new_connect', players);
         socket.on('disconnect', function() {
             delete players[socket.id];
         });
@@ -48,16 +47,20 @@ io.on('connection', function(socket) {
         let player = players[socket.id] || {};
         console.log(socket.id + ' ' + player.x + ' ' + player.y)
         if (data.left) {
-            player.x -= 5;
+            if(check_colicity(player, data))
+                player.x -= 5;
         }
         if (data.up) {
-            player.y -= 5;
+            if(check_colicity(player, data))
+                player.y -= 5;
         }
         if (data.right) {
-            player.x += 5;
+            if(check_colicity(player, data))
+                player.x += 5;
         }
         if (data.down) {
-            player.y += 5;
+            if(check_colicity(player, data))
+                player.y += 5;
         }
     });
 });
@@ -65,3 +68,8 @@ io.on('connection', function(socket) {
 setInterval(function() {
     io.sockets.emit('state', players);
 }, 1000 / 60);
+
+function check_colicity(player, data) {
+    return (player.x > 0 || !data.left) && (player.y > 0 || !data.up);
+    
+}
