@@ -22,13 +22,14 @@ let players = {};
 let playerSize = {x: 25, y: 25};
 let wall = {x1: 200, y1: 200, x2: 1000, y2: 600};
 let startZone = {x1: 200, y1: 200, x2: 350, y2: 600};
-let safeZone = {x1: 850, y1: 200, x2: 1000, y2: 600};
+let saveZone = {x1: 850, y1: 200, x2: 1000, y2: 600};
 let xCenter = (startZone.x1+startZone.x2)/2
 let yCenter = (startZone.y1+startZone.y2)/2;
+let dotsSpeedX = [6, -6, 6, -6, 6, -6, 6, -6, 6]
 let dotsSpeedY = [6, -6, 6, -6, 6, -6, 6, -6, 6]
 let dots = {
     x: [400, 450, 500, 550, 600, 650, 700, 750, 800],
-    y: [yCenter, yCenter, yCenter, yCenter, yCenter, yCenter, yCenter, yCenter, yCenter],
+    y: [580, 550, 500, 450, 400, 350, 300, 250, 220],
 }
 
 io.on('connection', function(socket) {
@@ -42,7 +43,7 @@ io.on('connection', function(socket) {
                 name: socket.id.slice(0,8)
             };
             io.sockets.emit('new_connect', players);
-            io.emit('level_setting', playerSize, wall, startZone, safeZone);
+            io.emit('level_setting', playerSize, wall, startZone, saveZone);
         }else{
             let koef = 0;
             for (let id in players) {
@@ -59,7 +60,7 @@ io.on('connection', function(socket) {
                     name: name
                 };
                 io.sockets.emit('new_connect', players);
-                io.emit('level_setting', playerSize, wall, startZone, safeZone);
+                io.emit('level_setting', playerSize, wall, startZone, saveZone);
             }
         }
 
@@ -88,7 +89,7 @@ io.on('connection', function(socket) {
             if(checkCrossing(player, data))
                 player.y += 2.5;
         }
-        if(checkSafeZone(player)){
+        if(checkSaveZone(player)){
             io.sockets.emit('game_over', player.name);
         }
     });
@@ -104,16 +105,25 @@ function checkCrossing(player, data) {
         (player.x < wall.x2-playerSize.x || !data.right) && (player.y < wall.y2-playerSize.y || !data.down);
 }
 
-function checkSafeZone(player) {
-    return (player.x >= safeZone.x1);
+function checkSaveZone(player) {
+    return (player.x >= saveZone.x1);
 }
 
 function moveDots() {
     for (let i = 0; i < dots.x.length; i+=1) {
-        if ( dots.y[i] + dotsSpeedY[i]-playerSize.x/2 < wall.y1 || dots.y[i] + dotsSpeedY[i]+playerSize.x/2 > wall.y2) {
-            dotsSpeedY[i] = -dotsSpeedY[i];
+        if ( dots.y[i] + dotsSpeedY[i]-playerSize.x/2 < wall.y1 || dots.y[i] + dotsSpeedY[i]+playerSize.x/2 > wall.y2 ||
+            dots.x[i] + dotsSpeedX[i]-playerSize.x/2 < startZone.x2 || dots.x[i] + dotsSpeedX[i]+playerSize.x/2 > saveZone.x1) {
+            if(i%2 === 0){
+                dotsSpeedY[i] = -dotsSpeedY[i];
+            }else{
+                dotsSpeedX[i] = -dotsSpeedX[i];
+            }
         }
-        dots.y[i]= dots.y[i] + dotsSpeedY[i];
+        if(i%2 === 0){
+            dots.y[i]= dots.y[i] + dotsSpeedY[i];
+        }else{
+            dots.x[i]= dots.x[i] + dotsSpeedX[i];
+        }
     }
 }
 

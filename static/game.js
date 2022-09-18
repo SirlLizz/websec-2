@@ -114,13 +114,13 @@ setInterval(function() {
 let playerSize = {};
 let wall = {};
 let startZone = {};
-let safeZone = {};
+let saveZone = {};
 
-socket.on('level_setting', function(newPlayerSize, newWall, newStartZone, newSafeZone) {
+socket.on('level_setting', function(newPlayerSize, newWall, newStartZone, newSaveZone) {
     playerSize = newPlayerSize;
     wall = newWall;
     startZone = newStartZone;
-    safeZone = newSafeZone;
+    saveZone = newSaveZone;
 });
 
 socket.on('state', function(players, dots) {
@@ -130,7 +130,7 @@ socket.on('state', function(players, dots) {
     let context = canvas.getContext('2d');
     context.clearRect(0,0, canvas.width, canvas.height);
     drawStartZone(context);
-    drawSafeZone(context);
+    drawSaveZone(context);
     drawWall(context);
     drawDots(context, dots);
     drawPlayers(players, context);
@@ -162,10 +162,10 @@ function drawStartZone(context){
     context.fill();
 }
 
-function drawSafeZone(context){
+function drawSaveZone(context){
     context.beginPath();
     context.fillStyle = '#40C781FF';
-    context.rect(safeZone.x1, safeZone.y1, safeZone.x2-safeZone.x1, safeZone.y2-safeZone.y1);
+    context.rect(saveZone.x1, saveZone.y1, saveZone.x2-saveZone.x1, saveZone.y2-saveZone.y1);
     context.fill();
 }
 
