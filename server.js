@@ -23,15 +23,21 @@ let playerSize = {x: 25, y: 25};
 let wall = {x1: 200, y1: 200, x2: 1000, y2: 600};
 let startZone = {x1: 200, y1: 200, x2: 350, y2: 600};
 let safeZone = {x1: 850, y1: 200, x2: 1000, y2: 600};
-
+let xCenter = (startZone.x1+startZone.x2)/2
+let yCenter = (startZone.y1+startZone.y2)/2;
+let dotsSpeedY = [6, -6, 6, -6, 6, -6, 6, -6, 6]
+let dots = {
+    x: [400, 450, 500, 550, 600, 650, 700, 750, 800],
+    y: [yCenter, yCenter, yCenter, yCenter, yCenter, yCenter, yCenter, yCenter, yCenter],
+}
 
 io.on('connection', function(socket) {
     socket.on('new_player', function(color, name) {
         console.log('new player' + players[socket.id]);
         if(name === ''){
             players[socket.id] = {
-                x: (startZone.x1+startZone.x2 -25)/2,
-                y: (startZone.y1+startZone.y2 -25)/2,
+                x: xCenter - playerSize.x/2,
+                y: yCenter - playerSize.y/2,
                 color: color,
                 name: socket.id.slice(0,8)
             };
@@ -47,8 +53,8 @@ io.on('connection', function(socket) {
             }
             if(koef === 0){
                 players[socket.id] = {
-                    x: (startZone.x1+startZone.x2 -25)/2,
-                    y: (startZone.y1+startZone.y2 -25)/2,
+                    x: xCenter - playerSize.x/2,
+                    y: yCenter - playerSize.y/2,
                     color: color,
                     name: name
                 };
@@ -61,40 +67,63 @@ io.on('connection', function(socket) {
             delete players[socket.id];
         });
     });
+
     socket.on('movement', function(data) {
         let player = players[socket.id] || {};
         console.log(socket.id + ' ' + player.x + ' ' + player.y)
+        checkDotsCrossing(player);
         if (data.left) {
-            if(check_crossing(player, data))
+            if(checkCrossing(player, data))
                 player.x -= 2.5;
         }
         if (data.up) {
-            if(check_crossing(player, data))
+            if(checkCrossing(player, data))
                 player.y -= 2.5;
         }
         if (data.right) {
-            if(check_crossing(player, data))
+            if(checkCrossing(player, data))
                 player.x += 2.5;
         }
         if (data.down) {
-            if(check_crossing(player, data))
+            if(checkCrossing(player, data))
                 player.y += 2.5;
         }
-        if(check_safeZone(player)){
+        if(checkSafeZone(player)){
             io.sockets.emit('game_over', player.name);
         }
     });
 });
 
 setInterval(function() {
-    io.sockets.emit('state', players);
+    moveDots();
+    io.sockets.emit('state', players, dots);
 }, 1000 / 60);
 
-function check_crossing(player, data) {
+function checkCrossing(player, data) {
     return (player.x > wall.x1 || !data.left) && (player.y > wall.y1 || !data.up) &&
         (player.x < wall.x2-playerSize.x || !data.right) && (player.y < wall.y2-playerSize.y || !data.down);
 }
 
-function check_safeZone(player) {
+function checkSafeZone(player) {
     return (player.x >= safeZone.x1);
+}
+
+function moveDots() {
+    for (let i = 0; i < dots.x.length; i+=1) {
+        if ( dots.y[i] + dotsSpeedY[i]-playerSize.x/2 < wall.y1 || dots.y[i] + dotsSpeedY[i]+playerSize.x/2 > wall.y2) {
+            dotsSpeedY[i] = -dotsSpeedY[i];
+        }
+        dots.y[i]= dots.y[i] + dotsSpeedY[i];
+    }
+}
+
+function checkDotsCrossing(player){
+    for (let i = 0; i < dots.x.length; i+=1) {
+        let d = Math.sqrt(Math.pow(player.x + playerSize.x/2 -dots.x[i], 2) + Math.pow(player.y + playerSize.y/2-dots.y[i], 2));
+        if (d <= 30) {
+            player.x = xCenter - playerSize.x/2;
+            player.y = yCenter - playerSize.y/2;
+            console.log('died by dot ' + i);
+        }
+    }
 }

@@ -23,7 +23,6 @@ socket.on('new_connect', function(players) {
         let player = players[id];
         let koef = 0;
         for(let elemId = 0; elemId < thisListElem.length; elemId++){
-            console.log(thisListElem[elemId].textContent);
             if(player.name === thisListElem[elemId].textContent){
                 koef +=1;
             }
@@ -124,7 +123,7 @@ socket.on('level_setting', function(newPlayerSize, newWall, newStartZone, newSaf
     safeZone = newSafeZone;
 });
 
-socket.on('state', function(players) {
+socket.on('state', function(players, dots) {
     let canvas = document.getElementById('canvas');
     canvas.width = window.innerWidth - 226;
     canvas.height = window.innerHeight;
@@ -133,6 +132,7 @@ socket.on('state', function(players) {
     drawStartZone(context);
     drawSafeZone(context);
     drawWall(context);
+    drawDots(context, dots);
     drawPlayers(players, context);
 });
 
@@ -167,6 +167,17 @@ function drawSafeZone(context){
     context.fillStyle = '#40C781FF';
     context.rect(safeZone.x1, safeZone.y1, safeZone.x2-safeZone.x1, safeZone.y2-safeZone.y1);
     context.fill();
+}
+
+function drawDots(context, dots){
+    for (let i = 0; i < dots.x.length; i+=1) {
+        context.beginPath();
+        context.fillStyle = 'blue';
+        context.strokeStyle = 'black';
+        context.arc(dots.x[i], dots.y[i], playerSize.x/2, 0, 2 * Math.PI);
+        context.fill();
+        context.stroke();
+    }
 }
 
 
