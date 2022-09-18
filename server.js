@@ -15,7 +15,7 @@ app.get('/', function(request, response) {
 });
 
 server.listen(5000, function() {
-    console.log('Запускаю сервер на порте 5000');
+    console.log('Run server by port 5000');
 });
 
 let players = {};
@@ -34,7 +34,6 @@ let dots = {
 
 io.on('connection', function(socket) {
     socket.on('new_player', function(color, name) {
-        console.log('new player' + players[socket.id]);
         if(name === ''){
             players[socket.id] = {
                 x: xCenter - playerSize.x/2,
@@ -71,7 +70,6 @@ io.on('connection', function(socket) {
 
     socket.on('movement', function(data) {
         let player = players[socket.id] || {};
-        console.log(socket.id + ' ' + player.x + ' ' + player.y)
         checkDotsCrossing(player);
         if (data.left) {
             if(checkCrossing(player, data))
@@ -133,7 +131,7 @@ function checkDotsCrossing(player){
         if (d <= 30) {
             player.x = xCenter - playerSize.x/2;
             player.y = yCenter - playerSize.y/2;
-            console.log('died by dot ' + i);
+            console.log(player.name + ' died by dot ' + i);
         }
     }
 }
