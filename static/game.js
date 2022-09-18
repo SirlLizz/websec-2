@@ -1,15 +1,66 @@
 let socket = io();
 
+let name;
+let color;
+
 function start_game() {
-    let color = document.getElementById('picker').style.color;
-    let name = document.getElementById('inputName').value;
-    document.getElementById('overlay').style.display='none';
-    if(name === ''){
-        addPlayer(socket.id.slice(0,8), color, 'lightgreen');
-    }else{
-        addPlayer(name, color, 'lightgreen');
-    }
+    color = document.getElementById('picker').style.color;
+    name = document.getElementById('inputName').value;
     socket.emit('new_player', color, name);
+}
+
+socket.on('new_connect', function(players) {
+    document.getElementById('overlay').style.display='none';
+    if(document.querySelector('.user-list__item_name') === null){
+        if(name === ''){
+            addPlayerInList(socket.id.slice(0,8), color, 'lightgreen');
+        }else{
+            addPlayerInList(name, color, 'lightgreen');
+        }
+    }
+    let thisListElem = document.getElementsByClassName("user-list__item_name");
+    for (let id in players) {
+        let player = players[id];
+        let koef = 0;
+        for(let elemId = 0; elemId < thisListElem.length; elemId++){
+            console.log(thisListElem[elemId].textContent);
+            if(player.name === thisListElem[elemId].textContent){
+                koef +=1;
+            }
+        }
+        if(koef === 0){
+            addPlayerInList(player.name, player.color);
+        }
+    }
+});
+
+socket.on('incorrect_name', function(nameSocket) {
+    if(socket.id === nameSocket){
+        alert("This name is already use!");
+    }
+});
+
+socket.on('game_over', function(win_player) {
+    document.getElementById('overlay-game-over').style.display='block';
+    if(win_player === document.querySelector('.user-list__item_name').textContent){
+        document.getElementById('img-game-over').src = "https://cdn-icons-png.flaticon.com/512/6941/6941697.png";
+        document.getElementById('text-game-over').textContent = "You Win!";
+    } else {
+        document.getElementById('img-game-over').src = "https://cdn130.picsart.com/300471282019211.png";
+        document.getElementById('text-game-over').textContent = "You Lose, Win " + win_player;
+    }
+});
+
+function addPlayerInList(name, color, backgroundColor = '#eeeeee'){
+    let listElem = document.querySelector('#user-list');
+    const newItem = document.createElement('div');
+    newItem.innerHTML = `
+			<div class="user-list__item" style="background-color: ${backgroundColor}">
+     			<b class="user-list__item_name">${name}</b>
+     			<button class="user-list__item_color" style="background-color: ${color}"></button>
+    		</div>
+			`;
+    listElem.appendChild(newItem);
 }
 
 let movement = {
@@ -61,6 +112,17 @@ setInterval(function() {
     socket.emit('movement', movement);
 }, 1000 / 60);
 
+let playerSize = {};
+let wall = {};
+let startZone = {};
+let safeZone = {};
+
+socket.on('level_setting', function(newPlayerSize, newWall, newStartZone, newSafeZone) {
+    playerSize = newPlayerSize;
+    wall = newWall;
+    startZone = newStartZone;
+    safeZone = newSafeZone;
+});
 
 socket.on('state', function(players) {
     let canvas = document.getElementById('canvas');
@@ -68,45 +130,43 @@ socket.on('state', function(players) {
     canvas.height = window.innerHeight;
     let context = canvas.getContext('2d');
     context.clearRect(0,0, canvas.width, canvas.height);
+    drawStartZone(context);
+    drawSafeZone(context);
+    drawWall(context);
+    drawPlayers(players, context);
+});
+
+function drawPlayers(players, context){
     for (let id in players) {
         let player = players[id];
         context.beginPath();
         context.fillStyle = player.color;
-        context.rect(player.x, player.y, 20, 20);
+        context.strokeStyle = 'black';
+        context.rect(player.x, player.y, playerSize.x,  playerSize.y);
         context.fill();
+        context.stroke();
     }
-});
+}
 
-socket.on('new_connect', function(players) {
-    let thisListElem = document.getElementsByClassName("user-list__item_name");
-    console.log(thisListElem);
-    for (let id in players) {
-        let player = players[id];
-        let koef = 0;
-        console.log(thisListElem.length)
-        for(let elemId = 0; elemId < thisListElem.length; elemId++){
-            console.log(thisListElem[elemId].textContent);
-            if(player.name === thisListElem[elemId].textContent){
-                koef +=1;
-            }
-        }
-        console.log(koef);
-        if(koef === 0){
-            addPlayer(player.name, player.color);
-        }
-    }
-});
+function drawWall(context){
+    context.beginPath();
+    context.strokeStyle = 'black';
+    context.rect(wall.x1, wall.y1, wall.x2-wall.x1, wall.y2-wall.y1);
+    context.stroke();
+}
 
-function addPlayer(name, color, backgroundColor = '#eeeeee'){
-    let listElem = document.querySelector('#user-list');
-    const newItem = document.createElement('div');
-    newItem.innerHTML = `
-			<div class="user-list__item" style="background-color: ${backgroundColor}">
-     			<b class="user-list__item_name">${name}</b>
-     			<button class="user-list__item_color" style="background-color: ${color}"></button>
-    		</div>
-			`;
-    listElem.appendChild(newItem);
+function drawStartZone(context){
+    context.beginPath();
+    context.fillStyle = '#40C781FF';
+    context.rect(startZone.x1, startZone.y1, startZone.x2-startZone.x1, startZone.y2-startZone.y1);
+    context.fill();
+}
+
+function drawSafeZone(context){
+    context.beginPath();
+    context.fillStyle = '#40C781FF';
+    context.rect(safeZone.x1, safeZone.y1, safeZone.x2-safeZone.x1, safeZone.y2-safeZone.y1);
+    context.fill();
 }
 
 

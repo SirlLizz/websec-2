@@ -1,3 +1,7 @@
+html{
+    box-sizing: border-box;
+}
+
 #canvas{
     height: 100%;
     width: 100%;
@@ -7,6 +11,8 @@
 .playing-field-table{
     width: 100%;
     height: 100%;
+    position: relative;
+    box-sizing: border-box;
 }
 
 #user-list{
@@ -14,17 +20,21 @@
     min-width: 200px;
 }
 
-#overlay {
+.overlay {
     position: fixed;
     top: 0;
     left: 0;
-    display: block;
+    display: none;
     width: 100%;
     height: 100%;
     background: rgba(0, 0, 0, 0.65);
     z-index: 999;
     animation: fade .6s;
     overflow: auto;
+}
+
+.overlay-block{
+    display: block;
 }
 
 .popup {
@@ -108,6 +118,17 @@
 }
 .picker:hover {
     transform: scale(1.1);
+}
+
+#img-game-over{
+    height: 200px;
+    width: 200px;
+    margin: 0 auto;
+}
+
+#text-game-over{
+    text-align: center;
+    font-size: 18px;
 }
 
 .user-list__item{

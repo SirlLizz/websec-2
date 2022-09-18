@@ -17,7 +17,8 @@
                 </td>
             </tr>
         </table>
-        <div id="overlay">
+
+        <div id="overlay" class="overlay overlay-block">
             <div class="popup">
                 <h2 class="overlay-title">Create Hero!</h2>
                 <div>
@@ -43,6 +44,16 @@
                     </table>
                 </div>
                 <button class="overlay-start-btn" title="Start" onclick="start_game()">Start</button>
+            </div>
+        </div>
+
+        <div id="overlay-game-over" class="overlay">
+            <div class="popup">
+                <h2 class="overlay-title">Game Over!</h2>
+                <div style="display: grid; justify-content: space-around;">
+                    <image id="img-game-over"></image>
+                    <p id="text-game-over"></p>
+                </div>
             </div>
         </div>
     </body>
