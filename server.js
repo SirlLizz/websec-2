@@ -39,7 +39,8 @@ io.on('connection', function(socket) {
                 x: xCenter - playerSize.x/2,
                 y: yCenter - playerSize.y/2,
                 color: color,
-                name: socket.id.slice(0,8)
+                name: socket.id.slice(0,8),
+                updateTime: new Date().getTime()
             };
             io.sockets.emit('new_connect', players);
             io.emit('level_setting', playerSize, wall, startZone, saveZone);
@@ -69,24 +70,29 @@ io.on('connection', function(socket) {
     });
 
     socket.on('movement', function(data) {
+        let currentTime = (new Date()).getTime();
         let player = players[socket.id] || {};
+        let timeDifference = (currentTime - player.updateTime)/15;
+
+        console.log(timeDifference)
         checkDotsCrossing(player);
         if (data.left) {
             if(checkCrossing(player, data))
-                player.x -= 2.5;
+                player.x -= 2.5* timeDifference;
         }
         if (data.up) {
             if(checkCrossing(player, data))
-                player.y -= 2.5;
+                player.y -= 2.5* timeDifference;
         }
         if (data.right) {
             if(checkCrossing(player, data))
-                player.x += 2.5;
+                player.x += 2.5* timeDifference;
         }
         if (data.down) {
             if(checkCrossing(player, data))
-                player.y += 2.5;
+                player.y += 2.5* timeDifference;
         }
+        player.updateTime = currentTime;
         if(checkSaveZone(player)){
             io.sockets.emit('game_over', player.name);
         }
