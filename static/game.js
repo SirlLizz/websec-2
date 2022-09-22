@@ -33,9 +33,14 @@ socket.on('new_connect', function(players) {
     }
 });
 
-socket.on('incorrect_name', function(nameSocket) {
+socket.on('incorrect_name', function(message, nameSocket) {
     if(socket.id === nameSocket){
-        alert("This name is already use!");
+        if(message.use){
+            alert("This name is already use!");
+        }
+        if(message.name){
+            alert("This name is incorrect!");
+        }
     }
 });
 

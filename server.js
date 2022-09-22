@@ -34,6 +34,10 @@ let dots = {
 
 io.on('connection', function(socket) {
     socket.on('new_player', function(color, name) {
+        let message = {
+            name: false,
+            use: false
+        }
         if(name === ''){
             players[socket.id] = {
                 x: xCenter - playerSize.x/2,
@@ -45,22 +49,28 @@ io.on('connection', function(socket) {
             io.sockets.emit('new_connect', players);
             io.emit('level_setting', playerSize, wall, startZone, saveZone);
         }else{
-            let koef = 0;
-            for (let id in players) {
-                if(players[id].name === name){
-                    io.emit('incorrect_name', socket.id);
-                    koef +=1;
+            if(/^[a-zA-Z0-9]+$/.test(name)) {
+                let koef = 0;
+                for (let id in players) {
+                    if (players[id].name === name) {
+                        message.use = true;
+                        io.emit('incorrect_name', message, socket.id);
+                        koef += 1;
+                    }
                 }
-            }
-            if(koef === 0){
-                players[socket.id] = {
-                    x: xCenter - playerSize.x/2,
-                    y: yCenter - playerSize.y/2,
-                    color: color,
-                    name: name
-                };
-                io.sockets.emit('new_connect', players);
-                io.emit('level_setting', playerSize, wall, startZone, saveZone);
+                if (koef === 0) {
+                    players[socket.id] = {
+                        x: xCenter - playerSize.x / 2,
+                        y: yCenter - playerSize.y / 2,
+                        color: color,
+                        name: name
+                    };
+                    io.sockets.emit('new_connect', players);
+                    io.emit('level_setting', playerSize, wall, startZone, saveZone);
+                }
+            }else{
+                message.name = true;
+                io.emit('incorrect_name', message, socket.id);
             }
         }
 
