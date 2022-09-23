@@ -34,6 +34,7 @@ let dots = {
 
 io.on('connection', function(socket) {
     socket.on('new_player', function(color, name) {
+        console.log(color + ' ' + name);
         let message = {
             name: false,
             use: false
@@ -83,8 +84,7 @@ io.on('connection', function(socket) {
         let currentTime = (new Date()).getTime();
         let player = players[socket.id] || {};
         let timeDifference = (currentTime - player.updateTime)/15;
-
-        console.log(timeDifference)
+        
         checkDotsCrossing(player);
         if (data.left) {
             if(checkCrossing(player, data))

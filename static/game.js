@@ -10,25 +10,30 @@ function start_game() {
 }
 
 socket.on('new_connect', function(players) {
-    document.getElementById('overlay').style.display='none';
-    if(document.querySelector('.user-list__item_name') === null){
-        if(name === ''){
-            addPlayerInList(socket.id.slice(0,8), color, 'lightgreen');
-        }else{
-            addPlayerInList(name, color, 'lightgreen');
-        }
-    }
-    let thisListElem = document.getElementsByClassName("user-list__item_name");
-    for (let id in players) {
-        let player = players[id];
-        let koef = 0;
-        for(let elemId = 0; elemId < thisListElem.length; elemId++){
-            if(player.name === thisListElem[elemId].textContent){
-                koef +=1;
+    for(let checkId in players){
+        if(checkId === socket.id){
+            document.getElementById('overlay').style.display='none';
+            if(document.querySelector('.user-list__item_name') === null){
+                if(name === ''){
+                    addPlayerInList(socket.id.slice(0,8), color, 'lightgreen');
+                }else{
+                    addPlayerInList(name, color, 'lightgreen');
+                }
             }
-        }
-        if(koef === 0){
-            addPlayerInList(player.name, player.color);
+            let thisListElem = document.getElementsByClassName("user-list__item_name");
+            for (let id in players) {
+                let player = players[id];
+                let koef = 0;
+                for(let elemId = 0; elemId < thisListElem.length; elemId++){
+                    if(player.name === thisListElem[elemId].textContent){
+                        koef +=1;
+                    }
+                }
+                if(koef === 0){
+                    addPlayerInList(player.name, player.color);
+                }
+            }
+            break;
         }
     }
 });
